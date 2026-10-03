@@ -1,7 +1,3 @@
-# DMA
-
-The source has no comments, this is the explanation.
-
 ## Programming model
 
     DMA->src = src_address;

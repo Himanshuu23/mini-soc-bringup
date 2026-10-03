@@ -1,7 +1,3 @@
-# start.S, step by step
-
-The source has no comments, this is the explanation.
-
 ## Why custom instructions
 
 PicoRV32 does not implement the standard machine-mode CSRs (mstatus, mepc, mtvec). Interrupts use four custom instructions in the custom0 opcode space (0x0b):
