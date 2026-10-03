@@ -2,8 +2,6 @@ picosoc-bringup
 
 A small RV32I SoC built around PicoRV32, with a UART, a timer and a DMA engine, plus bare-metal C firmware and a Verilator testbench. Boots firmware in simulation, takes interrupts, copies memory with DMA, and reports pass/fail through a magic exit register. Python is used to poke registers over the simulated UART.
 
-Written to be explained end to end in an interview. The whole RTL (excluding PicoRV32) is about 470 lines.
-
 What It Does
 
 Builds firmware with a bare-metal toolchain, loads it into the simulated RAM, runs it on the real CPU RTL and reports each test over UART.
@@ -141,42 +139,6 @@ Tests
 | boot_check | .data initialised, .bss zeroed, .rodata, stack placement |
 
 The testbench fills RAM with 0xdeadbeef before loading the image, so a missing .bss clear shows up as garbage instead of passing by luck.
-
-Sample Output
-
-    $ make all-tests
-    TEST           RESULT   CYCLES  NOTE
-    -------------- ------ --------  ----
-    uart_hello     PASS      46711
-    timer_irq      PASS     322451
-    dma_memcpy     PASS     228389
-    boot_check     PASS      65771
-    regtool.py     PASS          -  python <-> uart monitor
-
-    5 passed, 0 failed
-
-    $ make sim TEST=dma_memcpy
-    [dma_memcpy] start
-      ok   busy right after start
-      ok   cpu kept running during dma
-      ok   done flag set
-      ok   polled copy matches
-      ok   guard words untouched
-      ok   no irq when irq_en is 0
-      info dma copied 64 words in ~397 cycles while cpu polled
-      ok   copy needs at least 4 cycles per word
-      ok   dma done interrupt delivered
-      ok   irq copy matches
-      ok   isr cleared done flag
-      ok   done irq is not re-entered
-      ok   single word completes
-      ok   only one word copied
-      ok   zero length finishes at once
-      ok   zero length copies nothing
-      ok   config writes ignored while busy
-      ok   transfer still completes
-    PASS dma_memcpy
-    [tb] exit code 0 after 228389 cycles
 
 Register Tool
 
