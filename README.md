@@ -33,7 +33,7 @@ Architecture
           |                                 +---------------+------+ |
           +----------- timer irq (bit 0), dma irq (bit 1) -----------+
 
-The DMA is a second bus master on the RAM. A small arbiter in soc_top alternates between the CPU and the DMA when both want the RAM, so neither starves. See docs/dma.md.
+The DMA is a second bus master on the RAM. A small arbiter in soc_top alternates between the CPU and the DMA when both want the RAM, so neither starves.
 
 Memory Map
 
@@ -45,7 +45,7 @@ Memory Map
 | 0x1000_2000 | DMA |
 | 0x1000_3000 | SYS, write the exit code here to end the simulation |
 
-Register-level detail is in docs/memory_map.md. Firmware splits the 64 KB in the linker script: code, rodata and the .data load image in the low 32 KB, .data, .bss and the stack in the high 32 KB.
+Firmware splits the 64 KB in the linker script: code, rodata and the .data load image in the low 32 KB, .data, .bss and the stack in the high 32 KB.
 
 Boot Flow
 
@@ -60,7 +60,7 @@ Boot Flow
       -> start.S writes it to the SYS exit register
       -> testbench stops and returns that status as the process exit code
 
-PicoRV32 comes out of reset with every interrupt masked, so firmware unmasks the ones it wants with the maskirq instruction. The details of start.S are in docs/boot_and_irq.md.
+PicoRV32 comes out of reset with every interrupt masked, so firmware unmasks the ones it wants with the maskirq instruction.
 
 Interrupt Handling
 
@@ -78,9 +78,9 @@ Waveform: Timer Interrupt (Pending but Masked)
 
 Captured with make sim TEST=timer_irq TRACE=1 and viewed in GTKWave.
 
-![Timer IRQ overview](docs/timer_irq_waveform.png)
+![Timer IRQ overview](assets/timer_irq_waveform.png)
 
-![Timer IRQ zoomed in](docs/timer_irq_waveform2.png)
+![Timer IRQ zoomed in](assets/timer_irq_waveform2.png)
 
 timer_irq goes high and irq becomes 00000001 (bit 0 is the timer). The CPU
 does not jump to irq_entry yet, because the firmware has not unmasked the
@@ -194,7 +194,6 @@ Layout
     sim/tb.cpp                   Verilator testbench
     sim/run_tests.sh             summary table
     tools/regtool.py
-    docs/                        memory map, boot and irq notes, dma notes
 
 License
 
