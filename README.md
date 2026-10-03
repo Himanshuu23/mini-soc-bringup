@@ -198,7 +198,7 @@ Problems Hit During Bring-up
 
 Limitations
 
-- Irq bit 1 is also PicoRV32's own ebreak/illegal-instruction interrupt. The DMA owns that bit here, and with LATCHED_IRQ cleared a stray illegal instruction while the DMA irq is unmasked can be missed. Firmware keeps IRQ_DMA masked outside DMA code, so an illegal instruction still traps and the testbench reports exit code 99.
+- Irq bit 1 is also PicoRV32's own ebreak/illegal-instruction interrupt, and the DMA owns that bit here. With IRQ_DMA masked, an illegal instruction traps and the testbench exits with code 99 (checked). With it unmasked, the event arrives as irq 1, dma_isr sees DONE clear and ignores it, and execution carries on (also checked). Firmware therefore keeps IRQ_DMA masked outside DMA code.
 - UART RX has a single byte buffer and no FIFO. The testbench leaves two character times between injected bytes.
 - The DMA only reaches RAM. Addresses outside 64 KB wrap onto it, there is no error flag.
 - No RISC-V compliance suite and no formal checks. Coverage is the four firmware tests and the regtool self-test.

@@ -23,7 +23,7 @@ Register layout is in memory_map.md. fw/dma.c wraps this in dma_start, dma_wait 
 - READ: ask the RAM for the word at the source address. When the acknowledge comes back, the data is sitting on the RAM read port and is captured into a holding register.
 - WRITE: write the held word to the destination address. On acknowledge, advance both addresses by 4 and decrement the counter.
 
-The working copies mean software can already reprogram nothing mid-transfer; configuration writes while busy are ignored on purpose, so a half-written descriptor cannot corrupt a running copy.
+The transfer runs on the working copies. Writes to SRC, DST and LEN while busy are ignored on purpose, so a half-written descriptor cannot corrupt a running copy.
 
 ## One word costs four cycles
 
@@ -43,7 +43,7 @@ Accesses to peripheral registers by the CPU (including the DMA's own registers) 
 
 ## Interrupt
 
-The irq output is done AND CTRL.irq_en, a level. It drops when software writes 1 to STATUS.done, which dma_isr does. Irq bit 1 in the CPU.
+The irq output is done AND CTRL.irq_en, a level wired to CPU irq bit 1. It drops when software writes 1 to STATUS.done, which dma_isr does.
 
 ## Limits
 
