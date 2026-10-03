@@ -4,6 +4,7 @@ OBJCOPY := $(CROSS)objcopy
 OBJDUMP := $(CROSS)objdump
 
 TESTS ?= uart_hello timer_irq dma_memcpy boot_check
+APPS  := monitor
 TEST  ?= uart_hello
 TRACE ?= 0
 
@@ -25,14 +26,18 @@ ifeq ($(TRACE),1)
 SIM_ARGS += --trace --vcd $(BUILD)/$(TEST).vcd
 endif
 
-.PHONY: all fw sim all-tests clean check-tools
+.PHONY: all fw sim all-tests regtool-test clean check-tools
 .SECONDARY:
 
 all: all-tests
 
-fw: $(addprefix $(FW_OUT)/,$(addsuffix .bin,$(TESTS)))
+fw: $(addprefix $(FW_OUT)/,$(addsuffix .bin,$(TESTS) $(APPS)))
 
 $(FW_OUT)/%.elf: fw/tests/%.c $(FW_DEPS)
+	@mkdir -p $(FW_OUT)
+	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map=$(FW_OUT)/$*.map -o $@ $(FW_COMMON) $< -lgcc
+
+$(FW_OUT)/%.elf: fw/apps/%.c $(FW_DEPS)
 	@mkdir -p $(FW_OUT)
 	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map=$(FW_OUT)/$*.map -o $@ $(FW_COMMON) $< -lgcc
 
@@ -50,7 +55,11 @@ sim: $(SIM) $(FW_OUT)/$(TEST).bin
 	$(SIM) $(SIM_ARGS) $(FW_OUT)/$(TEST).bin
 
 all-tests: $(SIM) fw
-	@sim/run_tests.sh $(SIM) $(FW_OUT) $(TESTS)
+	@REGTOOL="python3 tools/regtool.py --sim $(SIM) --firmware $(FW_OUT)/monitor.bin --selftest --quiet" \
+		sim/run_tests.sh $(SIM) $(FW_OUT) $(TESTS)
+
+regtool-test: $(SIM) fw
+	python3 tools/regtool.py --sim $(SIM) --firmware $(FW_OUT)/monitor.bin --selftest
 
 check-tools:
 	@command -v verilator >/dev/null || echo "missing: verilator"
