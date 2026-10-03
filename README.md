@@ -76,6 +76,21 @@ Interrupt Handling
 
 Each peripheral irq is a level signal that stays high until the status flag is cleared, so the handler must clear it before returning. Timer is irq bit 0, DMA is irq bit 1.
 
+Waveform: Timer Interrupt (Pending but Masked)
+
+Captured with make sim TEST=timer_irq TRACE=1 and viewed in GTKWave.
+
+![Timer IRQ overview](docs/timer_irq_waveform.png)
+
+![Timer IRQ zoomed in](docs/timer_irq_waveform2.png)
+
+timer_irq goes high and irq becomes 00000001 (bit 0 is the timer). The CPU
+does not jump to irq_entry yet, because the firmware has not unmasked the
+timer interrupt, so it stays pending. Meanwhile mem_addr shows the CPU
+looping in main and reading a timer register (0x1000100C) while it polls the
+status. The test fw/tests/timer_irq.c checks this on purpose ("masked cpu irq
+stays pending"). Only after irq_enable(IRQ_TIMER) does the CPU take it.
+
 DMA
 
 A word-copy engine from RAM to RAM. Software writes SRC, DST, LEN (in words), sets CTRL.start and either polls STATUS.done or waits for the interrupt. Internally it is a three-state machine (idle, read, write); one word costs four cycles when the RAM is free. Measured in this repo's test: 64 words in about 397 cycles while the CPU is also fetching code from the same RAM.
@@ -91,6 +106,8 @@ Install on Ubuntu 24.04:
     sudo apt install verilator gcc-riscv64-unknown-elf binutils-riscv64-unknown-elf make python3 g++
 
 The Makefile uses riscv32-unknown-elf-gcc if it is on PATH and otherwise falls back to riscv64-unknown-elf-gcc. Both are invoked with -march=rv32i -mabi=ilp32, and the Ubuntu riscv64 package ships an rv32i multilib. Override with make CROSS=my-prefix-.
+
+On Arch Linux the compiler is named riscv64-elf-gcc, so run: make CROSS=riscv64-elf- all-tests
 
 Usage
 
