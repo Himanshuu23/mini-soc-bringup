@@ -3,7 +3,7 @@ CC      := $(CROSS)gcc
 OBJCOPY := $(CROSS)objcopy
 OBJDUMP := $(CROSS)objdump
 
-TESTS ?= uart_hello boot_check
+TESTS ?= uart_hello timer_irq boot_check
 TEST  ?= uart_hello
 TRACE ?= 0
 
