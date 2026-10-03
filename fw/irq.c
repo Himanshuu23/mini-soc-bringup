@@ -1,3 +1,4 @@
+#include "dma.h"
 #include "irq.h"
 #include "sys.h"
 #include "timer.h"
@@ -15,6 +16,8 @@ void irq_handler(uint32_t pending)
 {
     if (pending & IRQ_TIMER)
         timer_isr();
+    if (pending & IRQ_DMA)
+        dma_isr();
     if (pending & ~(uint32_t)(IRQ_TIMER | IRQ_DMA))
         fatal(pending);
 }

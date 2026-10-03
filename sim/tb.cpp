@@ -20,6 +20,7 @@
 static const int kRamWords = 16384;
 static const int kBaudDiv = 16;
 static const uint32_t kRamFill = 0xdeadbeef;
+static const int kTraceDepth = 99;
 static const int kExitTrap = 99;
 static const int kExitTimeout = 124;
 static const int kExitUsage = 2;
@@ -29,6 +30,7 @@ struct Options {
     std::string vcd = "trace.vcd";
     bool trace = false;
     uint64_t timeout = 5000000;
+    uint64_t trace_cycles = 50000;
     int port = -1;
 };
 
@@ -186,6 +188,8 @@ static bool parse_args(int argc, char **argv, Options &opt)
             opt.trace = true;
         else if (arg == "--vcd" && i + 1 < argc)
             opt.vcd = argv[++i];
+        else if (arg == "--trace-cycles" && i + 1 < argc)
+            opt.trace_cycles = strtoull(argv[++i], nullptr, 0);
         else if (arg == "--timeout" && i + 1 < argc)
             opt.timeout = strtoull(argv[++i], nullptr, 0);
         else if (arg == "--listen" && i + 1 < argc)
@@ -195,8 +199,6 @@ static bool parse_args(int argc, char **argv, Options &opt)
         else
             return false;
     }
-    if (opt.trace && opt.vcd == "trace.vcd")
-        opt.vcd = "trace.vcd";
     return !opt.image.empty();
 }
 
@@ -204,7 +206,7 @@ int main(int argc, char **argv)
 {
     Options opt;
     if (!parse_args(argc, argv, opt)) {
-        fprintf(stderr, "usage: %s [--trace] [--vcd file] [--timeout cycles] [--listen port] firmware.{bin,hex}\n", argv[0]);
+        fprintf(stderr, "usage: %s [--trace] [--vcd file] [--trace-cycles n] [--timeout cycles] [--listen port] firmware.{bin,hex}\n", argv[0]);
         return kExitUsage;
     }
 
@@ -220,7 +222,7 @@ int main(int argc, char **argv)
     if (opt.trace) {
         ctx.traceEverOn(true);
         tfp = new VerilatedVcdC;
-        top.trace(tfp, 99);
+        top.trace(tfp, kTraceDepth);
         tfp->open(opt.vcd.c_str());
     }
 
@@ -249,14 +251,15 @@ int main(int argc, char **argv)
         top.resetn = cycle >= 8;
         top.uart_rx = driver.step();
 
+        bool tracing = tfp && cycle < opt.trace_cycles;
         top.clk = 0;
         top.eval();
-        if (tfp)
+        if (tracing)
             tfp->dump(ctx.time());
         ctx.timeInc(1);
         top.clk = 1;
         top.eval();
-        if (tfp)
+        if (tracing)
             tfp->dump(ctx.time());
         ctx.timeInc(1);
         cycle++;
