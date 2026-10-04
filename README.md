@@ -43,7 +43,7 @@ Memory Map
 | 0x1000_0000 | UART |
 | 0x1000_1000 | TIMER |
 | 0x1000_2000 | DMA |
-| 0x1000_3000 | SYS, write the exit code here to end the simulation |
+| 0x1000_3000 | SYS |
 
 Firmware splits the 64 KB in the linker script: code, rodata and the .data load image in the low 32 KB, .data, .bss and the stack in the high 32 KB.
 
