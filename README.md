@@ -194,7 +194,3 @@ Layout
     sim/tb.cpp                   Verilator testbench
     sim/run_tests.sh             summary table
     tools/regtool.py
-
-License
-
-MIT for the code in this repo. PicoRV32 is ISC licensed, see rtl/third_party/LICENSE.
